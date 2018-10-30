@@ -162,20 +162,24 @@ void loop()
         Serial.print("\t");
         Serial.println(totalDistanceRight);
 
+// Uncomment this and comment the above if doing wireless
+//        Serial1.print(angle_rad);  
+//        Serial1.print("\t");
+//        Serial1.print(angle_rad_accum);  
+//        Serial1.print("\t");
+//        Serial1.print(leftMotorPWM);
+//        Serial1.print("\t");
+//        Serial1.print(rightMotorPWM);
+//        Serial1.print("\t");
+//        Serial1.print(vL);
+//        Serial1.print("\t");
+//        Serial1.print(vR);
+//        Serial1.print("\t");
+//        Serial1.print(totalDistanceLeft);
+//        Serial1.print("\t");
+//        Serial1.println(totalDistanceRight);
+
         prev_print_time = cur_time;
-/* Uncomment this and comment the above if doing wireless
-        Serial1.print(angle_rad);  
-        Serial1.print("\t");
-        Serial1.print(angle_rad_accum);  
-        Serial1.print("\t");
-        Serial1.print(PWM_left);
-        Serial1.print("\t");
-        Serial1.print(PWM_right);
-        Serial1.print("\t");
-        Serial1.print(vL);
-        Serial1.print("\t");
-        Serial1.println(vR);
-       */
   }
 
   float delta_t = (cur_time - prev_time)/1000.0;
