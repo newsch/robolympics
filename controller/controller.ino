@@ -50,6 +50,10 @@ float vL, vR, totalDistanceLeft, totalDistanceRight;
 float leftMotorPWM = 0;
 float rightMotorPWM = 0;
 
+float thetaFactor;
+float leftDistanceFactor;
+float rightDistanceFactor;
+
 void balanceDoDriveTicks();
 
 extern int32_t displacement;
@@ -72,8 +76,12 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
    */
   int Kp = 459;
   int Ki = 4279;
-  leftMotorPWM = Kp * angleRad + Ki * angleRadAccum;
-  rightMotorPWM = Kp * angleRad + Ki * angleRadAccum;
+  int Kdis = 300;
+  thetaFactor = Kp * angleRad + Ki * angleRadAccum;
+  leftDistanceFactor = - Kdis*totalDistanceLeft;
+  rightDistanceFactor = - Kdis*totalDistanceRight;
+  leftMotorPWM = thetaFactor + leftDistanceFactor;
+  rightMotorPWM = thetaFactor + rightDistanceFactor;
 }
 
 uint32_t prev_time;
@@ -146,38 +154,44 @@ void loop()
   bool shouldPrint = cur_time - prev_print_time > 105;
   if(shouldPrint)   // do the printing every 105 ms. Don't want to do it for an integer multiple of 10ms to not hog the processor
   {
-        Serial.print(angle_rad);  
+        // Serial.print(angle_rad);  
+        // Serial.print("\t");
+        // Serial.print(angle_rad_accum);  
+        // Serial.print("\t");
+        // Serial.print(leftMotorPWM);
+        // Serial.print("\t");
+        // Serial.print(rightMotorPWM);
+        // Serial.print("\t");
+        // Serial.print(vL);
+        // Serial.print("\t");
+        // Serial.print(vR);
+        // Serial.print("\t");
+        // Serial.print(totalDistanceLeft);
+        // Serial.print("\t");
+        // Serial.println(totalDistanceRight);
+
+        Serial.print(thetaFactor);
         Serial.print("\t");
-        Serial.print(angle_rad_accum);  
+        Serial.print(leftDistanceFactor);
         Serial.print("\t");
-        Serial.print(leftMotorPWM);
-        Serial.print("\t");
-        Serial.print(rightMotorPWM);
-        Serial.print("\t");
-        Serial.print(vL);
-        Serial.print("\t");
-        Serial.print(vR);
-        Serial.print("\t");
-        Serial.print(totalDistanceLeft);
-        Serial.print("\t");
-        Serial.println(totalDistanceRight);
+        Serial.println(rightDistanceFactor);
 
 // Uncomment this and comment the above if doing wireless
-//        Serial1.print(angle_rad);  
-//        Serial1.print("\t");
-//        Serial1.print(angle_rad_accum);  
-//        Serial1.print("\t");
-//        Serial1.print(leftMotorPWM);
-//        Serial1.print("\t");
-//        Serial1.print(rightMotorPWM);
-//        Serial1.print("\t");
-//        Serial1.print(vL);
-//        Serial1.print("\t");
-//        Serial1.print(vR);
-//        Serial1.print("\t");
-//        Serial1.print(totalDistanceLeft);
-//        Serial1.print("\t");
-//        Serial1.println(totalDistanceRight);
+      //  Serial1.print(angle_rad);  
+      //  Serial1.print("\t");
+      //  Serial1.print(angle_rad_accum);  
+      //  Serial1.print("\t");
+      //  Serial1.print(leftMotorPWM);
+      //  Serial1.print("\t");
+      //  Serial1.print(rightMotorPWM);
+      //  Serial1.print("\t");
+      //  Serial1.print(vL);
+      //  Serial1.print("\t");
+      //  Serial1.print(vR);
+      //  Serial1.print("\t");
+      //  Serial1.print(totalDistanceLeft);
+      //  Serial1.print("\t");
+      //  Serial1.println(totalDistanceRight);
 
         prev_print_time = cur_time;
   }
