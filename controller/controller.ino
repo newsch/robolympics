@@ -70,8 +70,10 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
    *    angleRad: the angle in radians relative to vertical (note: not the same as error)
    *    angleRadAccum: the angle integrated over time (note: not the same as error)
    */
-  leftMotorPWM = 0;
-  rightMotorPWM = 0;
+  int Kp = 459;
+  int Ki = 4279;
+  leftMotorPWM = Kp * angleRad + Ki * angleRadAccum;
+  rightMotorPWM = Kp * angleRad + Ki * angleRadAccum;
 }
 
 uint32_t prev_time;
