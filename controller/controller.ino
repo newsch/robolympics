@@ -74,14 +74,17 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
    *    angleRad: the angle in radians relative to vertical (note: not the same as error)
    *    angleRadAccum: the angle integrated over time (note: not the same as error)
    */
-  int Kp = 459;
-  int Ki = 4279;
-  int Kdis = 300;
-  thetaFactor = Kp * angleRad + Ki * angleRadAccum;
-  leftDistanceFactor = - Kdis*totalDistanceLeft;
-  rightDistanceFactor = - Kdis*totalDistanceRight;
-  leftMotorPWM = thetaFactor + leftDistanceFactor;
-  rightMotorPWM = thetaFactor + rightDistanceFactor;
+  int Kp = 550;
+  int Ki = 7640;
+  int K = -0.6;
+  int Ji = 1710;
+  int Jp = 3350;
+  v_theory = Kp * (angleRad - K * vL) + Ki * (angleRadAccum - K * totalDistanceLeft);
+  
+  leftMotorPWM = v_theory; // v_theory - (Jp * vL + Ji * totalDistanceLeft);
+  rightMotorPWM = v_theory // v_theory - (Jp * vL + Ji * totalDistanceLeft);
+  // leftMotorPWM = 0;
+  // rightMotorPWM = 0;
 }
 
 uint32_t prev_time;
@@ -170,11 +173,13 @@ void loop()
         // Serial.print("\t");
         // Serial.println(totalDistanceRight);
 
-        Serial.print(thetaFactor);
-        Serial.print("\t");
-        Serial.print(leftDistanceFactor);
-        Serial.print("\t");
-        Serial.println(rightDistanceFactor);
+        // Serial.print(thetaFactor);
+        // Serial.print("\t");
+        // Serial.print(leftDistanceFactor);
+        // Serial.print("\t");
+        // Serial.println(rightDistanceFactor);
+
+        Serial.println(angle);
 
 // Uncomment this and comment the above if doing wireless
       //  Serial1.print(angle_rad);  
