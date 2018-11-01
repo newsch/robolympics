@@ -146,8 +146,9 @@ void lyingDown()
   distanceRight = 0;
   motors.setSpeeds(0, 0);
 
-  if (angleRate > -6 && angleRate < 6)
+  if (angleRate > -6 && angleRate < 6 && abs(imu.a.z) > 15000)
   {
+    Serial.println("Resetting angle");
     // It's really calm, so we know the angles.
     if (imu.a.z > 0)
     {

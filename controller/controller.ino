@@ -179,7 +179,15 @@ void loop()
         // Serial.print("\t");
         // Serial.println(rightDistanceFactor);
 
+        // accelerometer values
+        Serial.print(imu.a.x);
+        Serial.print("\t");
+        Serial.print(imu.a.y);
+        Serial.print("\t");
+        Serial.print(imu.a.z);
+        Serial.print("\t");
         Serial.println(angle);
+
 
 // Uncomment this and comment the above if doing wireless
       //  Serial1.print(angle_rad);  
