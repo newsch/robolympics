@@ -49,7 +49,11 @@ extern int32_t distanceRight;
 float vL, vR, totalDistanceLeft, totalDistanceRight;
 float leftMotorPWM = 0;
 float rightMotorPWM = 0;
-
+float v_theory = 0;
+float v_theoryR = 0;
+float etheta;
+float evL;
+float evR;
 float thetaFactor;
 float leftDistanceFactor;
 float rightDistanceFactor;
@@ -74,15 +78,23 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
    *    angleRad: the angle in radians relative to vertical (note: not the same as error)
    *    angleRadAccum: the angle integrated over time (note: not the same as error)
    */
-  int Kp = 550;
-  int Ki = 7640;
-  int K = -0.6;
-  int Ji = 1710;
-  int Jp = 3350;
+  int Kp = 88;
+  int Ki = 100;
+  int K = 0.1;
+  int Ji = 56;
+  int Jp = 10;
+  //etheta = -(totalDistanceLeft + totalDistanceRight)/2 - angleRad;
+ 
+  //evL = (Kp*etheta + Ki*angleRadAccum) - vL;
+  //evR = (Kp*etheta + Ki*angleRadAccum) - vR;
+
+  //leftMotorPWM = Jp*evL + Ji*totalDistanceLeft;
+  //rightMotorPWM = Jp*evR + Ji*totalDistanceRight;
   v_theory = Kp * (angleRad - K * vL) + Ki * (angleRadAccum - K * totalDistanceLeft);
+  v_theoryR = Kp * (angleRad - K * vR) + Ki * (angleRadAccum - K * totalDistanceRight);
   
-  leftMotorPWM = v_theory; // v_theory - (Jp * vL + Ji * totalDistanceLeft);
-  rightMotorPWM = v_theory // v_theory - (Jp * vL + Ji * totalDistanceLeft);
+  leftMotorPWM = Jp*(v_theory - vL) + Ji * totalDistanceLeft;
+  rightMotorPWM = Jp*(v_theoryR - vR) + Ji * totalDistanceRight;
   // leftMotorPWM = 0;
   // rightMotorPWM = 0;
 }
@@ -157,21 +169,21 @@ void loop()
   bool shouldPrint = cur_time - prev_print_time > 105;
   if(shouldPrint)   // do the printing every 105 ms. Don't want to do it for an integer multiple of 10ms to not hog the processor
   {
-        // Serial.print(angle_rad);  
-        // Serial.print("\t");
-        // Serial.print(angle_rad_accum);  
-        // Serial.print("\t");
-        // Serial.print(leftMotorPWM);
-        // Serial.print("\t");
-        // Serial.print(rightMotorPWM);
-        // Serial.print("\t");
-        // Serial.print(vL);
-        // Serial.print("\t");
-        // Serial.print(vR);
-        // Serial.print("\t");
-        // Serial.print(totalDistanceLeft);
-        // Serial.print("\t");
-        // Serial.println(totalDistanceRight);
+         Serial.print(angle_rad);  
+         Serial.print("\t");
+         Serial.print(angle_rad_accum);  
+         Serial.print("\t");
+         Serial.print(leftMotorPWM);
+         Serial.print("\t");
+         Serial.print(rightMotorPWM);
+         Serial.print("\t");
+         Serial.print(v_theory);
+         Serial.print("\t");
+         Serial.print(v_theoryR);
+         Serial.print("\t");
+         Serial.print(totalDistanceLeft);
+         Serial.print("\t");
+         Serial.println(totalDistanceRight);
 
         // Serial.print(thetaFactor);
         // Serial.print("\t");
@@ -179,6 +191,7 @@ void loop()
         // Serial.print("\t");
         // Serial.println(rightDistanceFactor);
 
+<<<<<<< Updated upstream
         // accelerometer values
         Serial.print(imu.a.x);
         Serial.print("\t");
@@ -187,6 +200,17 @@ void loop()
         Serial.print(imu.a.z);
         Serial.print("\t");
         Serial.println(angle);
+=======
+//        // accelerometer values
+//        Serial.print(imu.a.x);
+//        Serial.print("\t");
+//        Serial.print(imu.a.y);
+//        Serial.print("\t");
+//        Serial.print(imu.a.z);
+//        Serial.print("\t");
+//        Serial.println(angle);
+
+>>>>>>> Stashed changes
 
 
 // Uncomment this and comment the above if doing wireless
@@ -226,6 +250,7 @@ void loop()
     {
       armed_flag = 1;
       buzzer.playFrequency(DIV_BY_10 | 445, 1000, 15);
+      angle_rad_accum = 0;
     }
   }
 
