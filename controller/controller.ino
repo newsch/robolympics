@@ -191,16 +191,6 @@ void loop()
         // Serial.print("\t");
         // Serial.println(rightDistanceFactor);
 
-<<<<<<< Updated upstream
-        // accelerometer values
-        Serial.print(imu.a.x);
-        Serial.print("\t");
-        Serial.print(imu.a.y);
-        Serial.print("\t");
-        Serial.print(imu.a.z);
-        Serial.print("\t");
-        Serial.println(angle);
-=======
 //        // accelerometer values
 //        Serial.print(imu.a.x);
 //        Serial.print("\t");
@@ -210,7 +200,6 @@ void loop()
 //        Serial.print("\t");
 //        Serial.println(angle);
 
->>>>>>> Stashed changes
 
 
 // Uncomment this and comment the above if doing wireless
