@@ -55,8 +55,8 @@ float rightVelErrorAccum;
 float vL, vR, totalDistanceLeft, totalDistanceRight;
 float leftMotorPWM = 0;
 float rightMotorPWM = 0;
-float leftMotorPWM1 = 0;
-float rightMotorPWM1 = 0;
+float angleError = 0;
+float angleErrorAccum = 0;
 
 float v_theory = 0;
 float v_theoryR = 0;
@@ -87,20 +87,27 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
    *    angleRad: the angle in radians relative to vertical (note: not the same as error)
    *    angleRadAccum: the angle integrated over time (note: not the same as error)
    */
-  float Jp = -9;
-  float Ji = -81;
-  float Kp = 85.2;
-  float Ki = 70.4;
-  float K = .3;
+  float Jp = 9;
+  float Ji = 81;
+  float Kp = -85.2;
+  float Ki = -70.4;
+  float K = -.3;
 
-  totalDistanceLeftAccum += totalDistanceLeft*deltaT;
-  totalDistanceRightAccum += totalDistanceRight*deltaT;
+//  totalDistanceLeftAccum += totalDistanceLeft*deltaT;
+//  totalDistanceRightAccum += totalDistanceRight*deltaT;
 
-  v_theory = Kp * (-angleRad + K * totalDistanceLeft) + Ki * (-angleRadAccum + K * totalDistanceLeftAccum);
-  v_theoryR = Kp * (-angleRad + K * totalDistanceRight) + Ki * (-angleRadAccum + K * totalDistanceRightAccum);
+//  v_theory = Kp * (-angleRad + K * totalDistanceLeft) + Ki * (-angleRadAccum + K * totalDistanceLeftAccum);
+//  v_theoryR = Kp * (-angleRad + K * totalDistanceRight) + Ki * (-angleRadAccum + K * totalDistanceRightAccum);
+
+  angleError = -angleRad + K * (totalDistanceLeft + totalDistanceRight)/2;
+  
+  angleErrorAccum += angleError * deltaT;
+  
+  v_theory = Kp * (angleError) + Ki * (angleErrorAccum);
+
   
   float leftVelError = v_theory - vL;
-  float rightVelError = v_theoryR - vR;
+  float rightVelError = v_theory - vR;
 
   leftVelErrorAccum += leftVelError*deltaT;
   rightVelErrorAccum += rightVelError*deltaT;
