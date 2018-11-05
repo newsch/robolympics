@@ -88,11 +88,11 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
    *    angleRad: the angle in radians relative to vertical (note: not the same as error)
    *    angleRadAccum: the angle integrated over time (note: not the same as error)
    */
-  float Jp = 376;
-  float Ji = 429;
-  float Kp = -3;
-  float Ki = -53.9;
-  float K = 0.2;
+  float Jp = 10;
+  float Ji = 60;
+  float Kp = -88;
+  float Ki = -100;
+  float K = -0.3;
 
   // singular velocity error
   angleError = -angleRad + K * (totalDistanceLeft + totalDistanceRight)/2;
@@ -111,8 +111,8 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
   // v_theoryR = Kp * (-angleRad + K * totalDistanceRight) + Ki * (-angleRadAccum + K * totalDistanceRightAccum);
   // float leftVelError = v_theoryL - vL;
   // float rightVelError = v_theoryR - vR;
-  // leftVelErrorAccum += leftVelError*deltaT;
-  // rightVelErrorAccum += rightVelError*deltaT;
+  leftVelErrorAccum += leftVelError*deltaT;
+  rightVelErrorAccum += rightVelError*deltaT;
 
   // set motor pwm
   leftMotorPWM = Jp*(leftVelError) + Ji * leftVelErrorAccum;
