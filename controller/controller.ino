@@ -49,6 +49,9 @@ extern int32_t distanceRight;
 float vL, vR, totalDistanceLeft, totalDistanceRight;
 float leftMotorPWM = 0;
 float rightMotorPWM = 0;
+float leftMotorPWM1 = 0;
+float rightMotorPWM1 = 0;
+
 float v_theory = 0;
 float v_theoryR = 0;
 float etheta;
@@ -78,25 +81,19 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
    *    angleRad: the angle in radians relative to vertical (note: not the same as error)
    *    angleRadAccum: the angle integrated over time (note: not the same as error)
    */
-  int Kp = 88;
-  int Ki = 100;
-  int K = 0.1;
-  int Ji = 56;
-  int Jp = 10;
-  //etheta = -(totalDistanceLeft + totalDistanceRight)/2 - angleRad;
- 
-  //evL = (Kp*etheta + Ki*angleRadAccum) - vL;
-  //evR = (Kp*etheta + Ki*angleRadAccum) - vR;
+  float Jp = -9;
+  float Ji = -81;
+  float Kp = 85.2;
+  float Ki = 70.4;
+  float K = .3;
 
-  //leftMotorPWM = Jp*evL + Ji*totalDistanceLeft;
-  //rightMotorPWM = Jp*evR + Ji*totalDistanceRight;
-  v_theory = Kp * (angleRad - K * vL) + Ki * (angleRadAccum - K * totalDistanceLeft);
-  v_theoryR = Kp * (angleRad - K * vR) + Ki * (angleRadAccum - K * totalDistanceRight);
+  v_theory = Kp * (-angleRad + K * totalDistanceLeft) + Ki * (angleRadAccum - K * totalDistanceLeft);
+  v_theoryR = Kp * (-angleRad + K * totalDistanceRight) + Ki * (angleRadAccum - K * totalDistanceRight);
   
   leftMotorPWM = Jp*(v_theory - vL) + Ji * totalDistanceLeft;
   rightMotorPWM = Jp*(v_theoryR - vR) + Ji * totalDistanceRight;
-  // leftMotorPWM = 0;
-  // rightMotorPWM = 0;
+//  leftMotorPWM = 0;
+//  rightMotorPWM = 0;
 }
 
 uint32_t prev_time;
