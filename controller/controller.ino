@@ -8,7 +8,7 @@
 //  The robot has a hardcoded angle offset between the lying down and the
 //    standing up configuration.  This offset can be modified in Balance.cpp around the lines below:
 //
-//      // this is based on coarse measurement of what I think the angle would be resting on the flat surface. 
+//      // this is based on coarse measurement of what I think the angle would be resting on the flat surface.
 //      // this corresponds to 94.8 degrees
 //      angle = 94827-6000;
 //
@@ -51,15 +51,16 @@ float totalDistanceLeftAccum;
 float totalDistanceRightAccum;
 float leftVelErrorAccum;
 float rightVelErrorAccum;
+float angleError;
+float angleErrorAccum;
 
 float vL, vR, totalDistanceLeft, totalDistanceRight;
 float leftMotorPWM = 0;
 float rightMotorPWM = 0;
-float angleError = 0;
-float angleErrorAccum = 0;
 
-float v_theory = 0;
+float v_theoryL = 0;
 float v_theoryR = 0;
+float v_theory = 0;
 float etheta;
 float evL;
 float evR;
@@ -87,31 +88,33 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
    *    angleRad: the angle in radians relative to vertical (note: not the same as error)
    *    angleRadAccum: the angle integrated over time (note: not the same as error)
    */
-  float Jp = 9;
-  float Ji = 81;
-  float Kp = -85.2;
-  float Ki = -70.4;
-  float K = -.3;
+  float Jp = 376;
+  float Ji = 429;
+  float Kp = -3;
+  float Ki = -53.9;
+  float K = 0.2;
 
-//  totalDistanceLeftAccum += totalDistanceLeft*deltaT;
-//  totalDistanceRightAccum += totalDistanceRight*deltaT;
-
-//  v_theory = Kp * (-angleRad + K * totalDistanceLeft) + Ki * (-angleRadAccum + K * totalDistanceLeftAccum);
-//  v_theoryR = Kp * (-angleRad + K * totalDistanceRight) + Ki * (-angleRadAccum + K * totalDistanceRightAccum);
-
+  // singular velocity error
   angleError = -angleRad + K * (totalDistanceLeft + totalDistanceRight)/2;
-  
   angleErrorAccum += angleError * deltaT;
-  
+  // no K
+  // v_theoryL = Kp * (-angleRad) + Ki * -angleRadAccum;
+  // v_theoryR = v_theoryL;
   v_theory = Kp * (angleError) + Ki * (angleErrorAccum);
-
-  
   float leftVelError = v_theory - vL;
   float rightVelError = v_theory - vR;
 
-  leftVelErrorAccum += leftVelError*deltaT;
-  rightVelErrorAccum += rightVelError*deltaT;
+  // Independent wheel velocity errors
+  // totalDistanceLeftAccum += totalDistanceLeft*deltaT;
+  // totalDistanceRightAccum += totalDistanceRight*deltaT;
+  // v_theoryL = Kp * (-angleRad + K * totalDistanceLeft) + Ki * (-angleRadAccum + K * totalDistanceLeftAccum);
+  // v_theoryR = Kp * (-angleRad + K * totalDistanceRight) + Ki * (-angleRadAccum + K * totalDistanceRightAccum);
+  // float leftVelError = v_theoryL - vL;
+  // float rightVelError = v_theoryR - vR;
+  // leftVelErrorAccum += leftVelError*deltaT;
+  // rightVelErrorAccum += rightVelError*deltaT;
 
+  // set motor pwm
   leftMotorPWM = Jp*(leftVelError) + Ji * leftVelErrorAccum;
   rightMotorPWM = Jp*(rightVelError) + Ji * rightVelErrorAccum;
   // leftMotorPWM = 0;
@@ -151,7 +154,7 @@ void newBalanceUpdate()
 
   // call functions to integrate encoders and gyros
   balanceUpdateSensors();
- 
+
   if (imu.a.x < 0)
   {
     lyingDown();
@@ -178,8 +181,8 @@ void loop()
 
 
 
-  newBalanceUpdate();                    // run the sensor updates. this function checks if it has been 10 ms since the previous 
-  
+  newBalanceUpdate();                    // run the sensor updates. this function checks if it has been 10 ms since the previous
+
   if(angle > 3000 || angle < -3000)      // If angle is not within +- 3 degrees, reset counter that waits for start
   {
     start_counter = 0;
@@ -188,23 +191,23 @@ void loop()
   bool shouldPrint = cur_time - prev_print_time > 105;
   if(shouldPrint)   // do the printing every 105 ms. Don't want to do it for an integer multiple of 10ms to not hog the processor
   {
-         Serial.print(angle_rad);  
+         Serial.print(angle_rad);
          Serial.print("\t");
-         Serial.print(angle_rad_accum);  
+         Serial.print(angle_rad_accum);
          Serial.print("\t");
-        //  Serial.print(totalDistanceLeftAccum);  
+        //  Serial.print(totalDistanceLeftAccum);
         //  Serial.print("\t");
-        //  Serial.print(totalDistanceRightAccum);  
+        //  Serial.print(totalDistanceRightAccum);
         //  Serial.print("\t");
-        //  Serial.print(leftVelErrorAccum);  
+        //  Serial.print(leftVelErrorAccum);
         //  Serial.print("\t");
-        //  Serial.print(rightVelErrorAccum);  
+        //  Serial.print(rightVelErrorAccum);
         //  Serial.print("\t");
          Serial.print(leftMotorPWM);
          Serial.print("\t");
          Serial.print(rightMotorPWM);
          Serial.print("\t");
-         Serial.print(v_theory);
+         Serial.print(v_theoryL);
          Serial.print("\t");
          Serial.print(v_theoryR);
          Serial.print("\t");
@@ -230,9 +233,9 @@ void loop()
 
 
 // Uncomment this and comment the above if doing wireless
-      //  Serial1.print(angle_rad);  
+      //  Serial1.print(angle_rad);
       //  Serial1.print("\t");
-      //  Serial1.print(angle_rad_accum);  
+      //  Serial1.print(angle_rad_accum);
       //  Serial1.print("\t");
       //  Serial1.print(leftMotorPWM);
       //  Serial1.print("\t");
@@ -255,9 +258,9 @@ void loop()
   if (prev_time == 0) {
     delta_t = 0.01;
   }
-  
+
   // every UPDATE_TIME_MS, check if angle is within +- 3 degrees and we haven't set the start flag yet
-  if(cur_time - prev_time > UPDATE_TIME_MS && angle > -3000 && angle < 3000 && !armed_flag)   
+  if(cur_time - prev_time > UPDATE_TIME_MS && angle > -3000 && angle < 3000 && !armed_flag)
   {
     // increment the start counter
     start_counter++;
@@ -273,6 +276,7 @@ void loop()
       totalDistanceRightAccum = 0.0;
       leftVelErrorAccum = 0.0;
       rightVelErrorAccum = 0.0;
+      angleErrorAccum = 0.0;
     }
   }
 
@@ -281,7 +285,7 @@ void loop()
 
   // only start when the angle falls outside of the 3.0 degree band around 0.  This allows you to let go of the
   // robot before it starts balancing
-  if(cur_time - prev_time > UPDATE_TIME_MS && (angle < -3000 || angle > 3000) && armed_flag)   
+  if(cur_time - prev_time > UPDATE_TIME_MS && (angle < -3000 || angle > 3000) && armed_flag)
   {
     start_flag = 1;
     armed_flag = 0;
@@ -292,6 +296,7 @@ void loop()
     totalDistanceRightAccum = 0.0;
     leftVelErrorAccum = 0.0;
     rightVelErrorAccum = 0.0;
+    angleErrorAccum = 0.0;
   }
 
   // every UPDATE_TIME_MS, if the start_flag has been set, do the balancing
