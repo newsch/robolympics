@@ -96,8 +96,8 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
   totalDistanceLeftAccum += totalDistanceLeft*deltaT;
   totalDistanceRightAccum += totalDistanceRight*deltaT;
 
-  v_theory = Kp * (-angleRad + K * totalDistanceLeft) + Ki * (angleRadAccum - K * totalDistanceLeftAccum);
-  v_theoryR = Kp * (-angleRad + K * totalDistanceRight) + Ki * (angleRadAccum - K * totalDistanceRightAccum);
+  v_theory = Kp * (-angleRad + K * totalDistanceLeft) + Ki * (-angleRadAccum + K * totalDistanceLeftAccum);
+  v_theoryR = Kp * (-angleRad + K * totalDistanceRight) + Ki * (-angleRadAccum + K * totalDistanceRightAccum);
   
   float leftVelError = v_theory - vL;
   float rightVelError = v_theoryR - vR;
@@ -107,8 +107,8 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
 
   leftMotorPWM = Jp*(leftVelError) + Ji * leftVelErrorAccum;
   rightMotorPWM = Jp*(rightVelError) + Ji * rightVelErrorAccum;
-//  leftMotorPWM = 0;
-//  rightMotorPWM = 0;
+  // leftMotorPWM = 0;
+  // rightMotorPWM = 0;
 }
 
 uint32_t prev_time;
@@ -211,14 +211,14 @@ void loop()
         // Serial.print("\t");
         // Serial.println(rightDistanceFactor);
 
-//        // accelerometer values
-//        Serial.print(imu.a.x);
-//        Serial.print("\t");
-//        Serial.print(imu.a.y);
-//        Serial.print("\t");
-//        Serial.print(imu.a.z);
-//        Serial.print("\t");
-//        Serial.println(angle);
+      //  // accelerometer values
+      //  Serial.print(imu.a.x);
+      //  Serial.print("\t");
+      //  Serial.print(imu.a.y);
+      //  Serial.print("\t");
+      //  Serial.print(imu.a.z);
+      //  Serial.print("\t");
+      //  Serial.println(angle);
 
 
 
