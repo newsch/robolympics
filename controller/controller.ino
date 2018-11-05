@@ -46,6 +46,12 @@ extern int32_t speedRight;
 extern int32_t distanceLeft;
 extern int32_t distanceRight;
 
+// Integral terms
+float totalDistanceLeftAccum;
+float totalDistanceRightAccum;
+float leftVelErrorAccum;
+float rightVelErrorAccum;
+
 float vL, vR, totalDistanceLeft, totalDistanceRight;
 float leftMotorPWM = 0;
 float rightMotorPWM = 0;
@@ -72,7 +78,7 @@ Balboa32U4Encoders encoders;
 Balboa32U4Buzzer buzzer;
 Balboa32U4ButtonA buttonA;
 
-void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, float vR, float angleRad, float angleRadAccum) {
+void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, float vR, float angleRad, float angleRadAccum, float deltaT) {
   /* You will fill this function in with your code to run the race.  The inputs to the function are:
    *    totalDistanceLeft: the total distance travelled by the left wheel (meters) as computed by the encoders
    *    totalDistanceRight: the total distance travelled by the right wheel (meters) as computed by the encoders
@@ -87,11 +93,20 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
   float Ki = 70.4;
   float K = .3;
 
-  v_theory = Kp * (-angleRad + K * totalDistanceLeft) + Ki * (angleRadAccum - K * totalDistanceLeft);
-  v_theoryR = Kp * (-angleRad + K * totalDistanceRight) + Ki * (angleRadAccum - K * totalDistanceRight);
+  totalDistanceLeftAccum += totalDistanceLeft*deltaT;
+  totalDistanceRightAccum += totalDistanceRight*deltaT;
+
+  v_theory = Kp * (-angleRad + K * totalDistanceLeft) + Ki * (angleRadAccum - K * totalDistanceLeftAccum);
+  v_theoryR = Kp * (-angleRad + K * totalDistanceRight) + Ki * (angleRadAccum - K * totalDistanceRightAccum);
   
-  leftMotorPWM = Jp*(v_theory - vL) + Ji * totalDistanceLeft;
-  rightMotorPWM = Jp*(v_theoryR - vR) + Ji * totalDistanceRight;
+  float leftVelError = v_theory - vL;
+  float rightVelError = v_theoryR - vR;
+
+  leftVelErrorAccum += leftVelError*deltaT;
+  rightVelErrorAccum += rightVelError*deltaT;
+
+  leftMotorPWM = Jp*(leftVelError) + Ji * leftVelErrorAccum;
+  rightMotorPWM = Jp*(rightVelError) + Ji * rightVelErrorAccum;
 //  leftMotorPWM = 0;
 //  rightMotorPWM = 0;
 }
@@ -170,6 +185,14 @@ void loop()
          Serial.print("\t");
          Serial.print(angle_rad_accum);  
          Serial.print("\t");
+        //  Serial.print(totalDistanceLeftAccum);  
+        //  Serial.print("\t");
+        //  Serial.print(totalDistanceRightAccum);  
+        //  Serial.print("\t");
+        //  Serial.print(leftVelErrorAccum);  
+        //  Serial.print("\t");
+        //  Serial.print(rightVelErrorAccum);  
+        //  Serial.print("\t");
          Serial.print(leftMotorPWM);
          Serial.print("\t");
          Serial.print(rightMotorPWM);
@@ -236,7 +259,13 @@ void loop()
     {
       armed_flag = 1;
       buzzer.playFrequency(DIV_BY_10 | 445, 1000, 15);
-      angle_rad_accum = 0;
+
+      // reset accumulated terms
+      angle_rad_accum = 0.0;
+      totalDistanceLeftAccum = 0.0;
+      totalDistanceRightAccum = 0.0;
+      leftVelErrorAccum = 0.0;
+      rightVelErrorAccum = 0.0;
     }
   }
 
@@ -249,7 +278,13 @@ void loop()
   {
     start_flag = 1;
     armed_flag = 0;
+
+    // reset accumulated terms
     angle_rad_accum = 0.0;
+    totalDistanceLeftAccum = 0.0;
+    totalDistanceRightAccum = 0.0;
+    leftVelErrorAccum = 0.0;
+    rightVelErrorAccum = 0.0;
   }
 
   // every UPDATE_TIME_MS, if the start_flag has been set, do the balancing
@@ -267,7 +302,7 @@ void loop()
     totalDistanceRight = METERS_PER_CLICK*distanceRight;
     angle_rad_accum += angle_rad*delta_t;
 
-    updatePWMs(totalDistanceLeft, totalDistanceRight, vL, vR, angle_rad, angle_rad_accum);
+    updatePWMs(totalDistanceLeft, totalDistanceRight, vL, vR, angle_rad, angle_rad_accum, delta_t);
 
     // if the robot is more than 45 degrees, shut down the motor
     if(start_flag && fabs(angle_rad) > FORTY_FIVE_DEGREES_IN_RADIANS)
