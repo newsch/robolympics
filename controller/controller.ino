@@ -54,6 +54,10 @@ float rightVelErrorAccum;
 float angleError;
 float angleErrorAccum;
 
+// imu corrections
+float imu_ax_average = 0.0;
+float alpha_imu_ax = 0.1;
+
 float vL, vR, totalDistanceLeft, totalDistanceRight;
 float leftMotorPWM = 0;
 float rightMotorPWM = 0;
@@ -154,8 +158,8 @@ void newBalanceUpdate()
 
   // call functions to integrate encoders and gyros
   balanceUpdateSensors();
-
-  if (imu.a.x < 0)
+  imu_ax_average = alpha_imu_ax*imu.a.x + (1 - alpha_imu_ax)*imu_ax_average;
+  if (imu_ax_average < 0)
   {
     lyingDown();
     isBalancingStatus = false;
