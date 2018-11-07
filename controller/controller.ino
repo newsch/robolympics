@@ -122,8 +122,8 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
   rightVelErrorAccum += rightVelError*deltaT;
 
   // set motor pwm
-  leftMotorPWM = Jp*(leftVelError) + Ji * leftVelErrorAccum;
-  rightMotorPWM = Jp*(rightVelError) + Ji * rightVelErrorAccum;
+  leftMotorPWM = constrain(Jp*(leftVelError) + Ji * leftVelErrorAccum,-300,300);
+  rightMotorPWM = constrain(Jp*(rightVelError) + Ji * rightVelErrorAccum,-300,300);
   // leftMotorPWM = 0;
   // rightMotorPWM = 0;
 }
