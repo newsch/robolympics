@@ -53,6 +53,7 @@ float leftVelErrorAccum;
 float rightVelErrorAccum;
 float angleError;
 float angleErrorAccum;
+float posAccum;
 
 // imu corrections
 float imu_ax_average = 0.0;
@@ -97,9 +98,11 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
   float Kp = -88;
   float Ki = -100;
   float K = -0.3;
+  posAccum += (vL + vR) / 2 * deltaT;
 
   // singular velocity error
-  angleError = -angleRad + K * (totalDistanceLeft + totalDistanceRight)/2;
+  // angleError = -angleRad + K * (totalDistanceLeft + totalDistanceRight)/2;
+  angleError = -angleRad + K * posAccum;
   angleErrorAccum += angleError * deltaT;
   // no K
   // v_theoryL = Kp * (-angleRad) + Ki * -angleRadAccum;
@@ -281,6 +284,7 @@ void loop()
       leftVelErrorAccum = 0.0;
       rightVelErrorAccum = 0.0;
       angleErrorAccum = 0.0;
+      posAccum = 0.0;
     }
   }
 
@@ -301,6 +305,7 @@ void loop()
     leftVelErrorAccum = 0.0;
     rightVelErrorAccum = 0.0;
     angleErrorAccum = 0.0;
+    posAccum = 0.0;
   }
 
   // every UPDATE_TIME_MS, if the start_flag has been set, do the balancing
