@@ -93,23 +93,30 @@ void updatePWMs(float totalDistanceLeft, float totalDistanceRight, float vL, flo
    *    angleRad: the angle in radians relative to vertical (note: not the same as error)
    *    angleRadAccum: the angle integrated over time (note: not the same as error)
    */
-  float Jp = 10;
-  float Ji = 60;
-  float Kp = -88;
-  float Ki = -100;
-  float K = -0.3;
+  float Jp = 10;  // motor controller proportional
+  float Ji = 60;  // motor controller integral
+  float Kp = -80;  // main controller proportional
+  float Ki = -100;  // main controller integral
+  float K = -0.25;  // position integral constant
+
+  float dTheta = 0.0;  // desired angle in radians
+  float dVel = 0.0;  // desired velocity in m/s
+  float dLVel = 0.0; // desired left wheel velocity in m/s
+  float dRVel = 0.0; // desired left wheel velocity in m/s
+
   posAccum += (vL + vR) / 2 * deltaT;
 
   // singular velocity error
   // angleError = -angleRad + K * (totalDistanceLeft + totalDistanceRight)/2;
   angleError = -angleRad + K * posAccum;
+  // if (abs(angleError) <= 0.001) {
+  //   angleError = 0;
+  // };
   angleErrorAccum += angleError * deltaT;
-  // no K
-  // v_theoryL = Kp * (-angleRad) + Ki * -angleRadAccum;
-  // v_theoryR = v_theoryL;
-  v_theory = Kp * (angleError) + Ki * (angleErrorAccum);
-  float leftVelError = v_theory - vL;
-  float rightVelError = v_theory - vR;
+
+  v_theory = Kp*angleError + Ki*angleErrorAccum;
+  float leftVelError = dLVel - vL + v_theory;
+  float rightVelError = dRVel - vR + v_theory;
 
   // Independent wheel velocity errors
   // totalDistanceLeftAccum += totalDistanceLeft*deltaT;
