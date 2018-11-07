@@ -148,14 +148,14 @@ void lyingDown()
 
   if (angleRate > -6 && angleRate < 6 && abs(imu.a.z) > 15000)
   {
-    Serial.println("Resetting angle");
+    // Serial.println("Resetting angle");
     // It's really calm, so we know the angles.
     if (imu.a.z > 0)
     {
       
       // this is based on coarse measurement of what I think the angle would be resting on the flat surface. 
       // this corresponds to 94.8 degrees
-      angle = 94827-10000+3500;
+      angle = 87900;  // 94827-10000+3500;
   
     }
     else
